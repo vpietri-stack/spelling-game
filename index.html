@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>单词保卫战 v0.5.0 (Phaser)</title>
+    <!-- Load Phaser 3 -->
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+    <!-- Load html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e);
+            color: white;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            touch-action: none;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            height: calc(var(--vh, 1vh) * 100);
+        }
+
+        /* --- UPPER AREA: THE GAME (60%) --- */
+        #game-container {
+            position: relative;
+            flex: 6;
+            background: transparent;
+            overflow: hidden;
+            border-bottom: 4px solid #4e4376;
+            z-index: 1;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            /* Centering Phaser Canvas */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Phaser puts canvas here */
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        #hud {
+            position: absolute;
+            top: 15px;
+            left: 0;
+            width: 100%;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+            font-size: 18px;
+            font-weight: 800;
+            z-index: 5;
+            text-shadow: 2px 2px 0px #000;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        #word-container {
+            position: absolute;
+            top: 70px;
+            width: 100%;
+            text-align: center;
+            pointer-events: none;
+            z-index: 5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+
+        #word-display {
+            font-family: 'Comic Sans MS', 'Comic Sans', cursive;
+            font-size: 56px;
+            font-weight: 900;
+            letter-spacing: 4px;
+            text-shadow: 0 0 15px #00d2ff, 2px 2px 0 #000;
+            transition: transform 0.1s;
+        }
+
+        /* REPLAY BUTTON */
+        #replay-btn {
+            pointer-events: auto;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(0, 210, 255, 0.5);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            color: #00d2ff;
+            transition: all 0.1s;
+            z-index: 20;
+        }
+
+        #replay-btn:active {
+            background: rgba(0, 210, 255, 0.4);
+            transform: scale(0.9);
+        }
+
+        /* --- LOWER AREA: THE KEYPAD (40%) --- */
+        #keyboard-container {
+            flex: 4;
+            background: #151515;
+            padding: 10px;
+            padding-bottom: 100px;
+            padding-bottom: calc(20px + env(safe-area-inset-bottom));
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            grid-gap: 10px;
+            z-index: 10;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .key-btn {
+            background: linear-gradient(145deg, #2a2a2a, #333);
+            color: #eee;
+            border: 1px solid #444;
+            border-radius: 12px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #111;
+            transition: all 0.05s;
+            max-height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .key-btn:active,
+        .key-btn.active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #111;
+            background: #00e676;
+            color: #000;
+            border-color: #00e676;
+        }
+
+        /* --- SCREENS --- */
+        #menu-screen,
+        #start-screen,
+        #game-over-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 12, 41, 0.98);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+            overflow-y: auto;
+        }
+
+        /* --- MENU STYLES --- */
+        .menu-title {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 25px;
+            color: #ffd700;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .menu-container {
+            background: #1a1a2e;
+            padding: 25px 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .dropdown-row {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .dropdown-wrapper {
+            position: relative;
+        }
+
+        .dropdown-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 12px 16px;
+            min-width: 90px;
+            background: #2a2a3e;
+            border: 2px solid #3a3a4e;
+            border-radius: 25px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-btn:hover {
+            background: #3a3a4e;
+            border-color: #4a4a5e;
+        }
+
+        .dropdown-btn:active {
+            transform: scale(0.97);
+        }
+
+        .dropdown-btn .chevron {
+            font-size: 10px;
+            opacity: 0.7;
+            transition: transform 0.2s ease;
+        }
+
+        .dropdown-btn.open .chevron {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2a2a3e;
+            border: 2px solid #3a3a4e;
+            border-radius: 12px;
+            min-width: 120px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 10px 16px;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        .dropdown-item:first-child {
+            border-radius: 10px 10px 0 0;
+        }
+
+        .dropdown-item:last-child {
+            border-radius: 0 0 10px 10px;
+        }
+
+        .dropdown-item:hover {
+            background: #3a3a4e;
+        }
+
+        .dropdown-item.selected {
+            background: #4a4a5e;
+            color: #ffd700;
+        }
+
+        .start-lesson-btn {
+            margin-top: 25px;
+            padding: 14px 40px;
+            background: linear-gradient(135deg, #00b09b, #96c93d);
+            border: none;
+            border-radius: 30px;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(0, 176, 155, 0.4);
+        }
+
+        .start-lesson-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 176, 155, 0.5);
+        }
+
+        .start-lesson-btn:active {
+            transform: translateY(0);
+        }
+
+        button.main-btn {
+            padding: 20px 60px;
+            font-size: 28px;
+            font-weight: bold;
+            background: linear-gradient(to right, #00b09b, #96c93d);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            margin-top: 40px;
+            box-shadow: 0 10px 20px rgba(0, 176, 155, 0.4);
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        button.main-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Floating Text for PowerUp */
+        .float-text {
+            position: absolute;
+            color: #ffff00;
+            font-weight: bold;
+            font-size: 24px;
+            animation: floatUp 1s ease-out forwards;
+            pointer-events: none;
+            text-shadow: 0 0 5px orange;
+            z-index: 20;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-50px) scale(1.5);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- MENU SCREEN -->
+    <div id="menu-screen">
+        <div class="menu-container">
+            <h1 class="menu-title">Select Lesson Content</h1>
+            <div class="dropdown-row">
+                <!-- Book Dropdown -->
+                <div class="dropdown-wrapper">
+                    <div class="dropdown-btn" id="book-dropdown" onclick="uiManager.toggleDropdown('book')">
+                        <span id="book-label">PU1</span>
+                        <span class="chevron">▼</span>
+                    </div>
+                    <div class="dropdown-menu" id="book-menu">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+                <!-- Unit Dropdown -->
+                <div class="dropdown-wrapper">
+                    <div class="dropdown-btn" id="unit-dropdown" onclick="uiManager.toggleDropdown('unit')">
+                        <span id="unit-label">Unit 1</span>
+                        <span class="chevron">▼</span>
+                    </div>
+                    <div class="dropdown-menu" id="unit-menu">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+                <!-- Session Dropdown -->
+                <div class="dropdown-wrapper">
+                    <div class="dropdown-btn" id="session-dropdown" onclick="uiManager.toggleDropdown('session')">
+                        <span id="session-label">Session 1</span>
+                        <span class="chevron">▼</span>
+                    </div>
+                    <div class="dropdown-menu" id="session-menu">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+            <button class="start-lesson-btn" onclick="uiManager.startFromDropdowns()">Start Game</button>
+        </div>
+    </div>
+
+    <!-- START SCREEN -->
+    <div id="start-screen" style="display:none">
+        <h1 style="margin:0; font-size: 42px; text-shadow: 0 0 20px #00d2ff; letter-spacing: 2px;">单词保卫战</h1>
+        <p style="color:#aaa; margin-top:5px; font-size: 16px;">V0.5.0 (Phaser)</p>
+
+        <div
+            style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 20px; margin: 20px; max-width: 85%; border: 1px solid rgba(255,255,255,0.1);">
+            <p id="selected-lesson-info" style="color: cyan; margin-bottom: 10px; font-size: 14px;">Lesson: None</p>
+            <hr style="border-color: #444; opacity: 0.5;">
+            <p style="margin: 10px 0;">1. 补充 <b style="color:#00e676">缺失字母</b></p>
+            <p style="margin: 10px 0;">2. 击杀怪物 <b style="color:#ffcc00">升级</b></p>
+            <p style="margin: 10px 0;">3. <b style="color:#ff4444">松开</b> 发射!</p>
+        </div>
+
+        <button class="main-btn" onclick="uiManager.initAudioAndStart()">开始游戏</button>
+        <div style="margin-top: 20px; text-decoration: underline; color: #888; font-size: 14px; cursor:pointer;"
+            onclick="location.reload()">Return to Menu</div>
+    </div>
+
+    <!-- GAME OVER -->
+    <div id="game-over-screen" style="display: none;">
+        <h1 style="color:#ff4444; font-size: 50px; text-shadow: 0 0 20px red;">游戏结束</h1>
+        <p id="game-over-lesson-info"
+            style="color: cyan; margin: 10px 0; font-size: 18px; font-weight: bold; text-transform: uppercase;">Lesson
+            Info</p>
+        <p style="font-size: 24px; margin: 20px;">最终分数</p>
+        <p style="font-size: 60px; font-weight: bold; color: #ffcc00; margin: 0; text-shadow: 0 5px 0 #b38f00;">
+            <span id="final-score">0</span>
+        </p>
+        <button class="main-btn" onclick="uiManager.resetGame()">再玩一次</button>
+        <div style="margin-top: 30px; padding: 10px; border: 1px solid #444; border-radius: 10px; cursor:pointer;"
+            onclick="location.reload()">
+            Select New Lesson
+        </div>
+        <!-- Share button placeholder if needed -->
+    </div>
+
+    <!-- GAME UI -->
+    <div id="game-container">
+        <!-- Phaser Canvas will be injected here -->
+        <div id="hud">
+            <div>SCORE: <span id="score" style="color:#00e676">0</span></div>
+            <div style="color:cyan">POWER: <span id="power-level">1</span></div>
+            <div>AMMO: <span id="ammo" style="color:#ffcc00">0</span></div>
+        </div>
+
+        <!-- Word Display Container with Replay Button -->
+        <div id="word-container">
+            <div id="word-display">READY</div>
+            <div id="replay-btn">🔊</div>
+        </div>
+    </div>
+
+    <div id="keyboard-container">
+        <!-- Buttons generated by JS -->
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/data/vocab.js"></script>
+    <script src="js/utils/audio.js"></script>
+    <script src="js/managers/UIManager.js"></script>
+    <script src="js/scenes/GameScene.js"></script>
+    <script src="js/game.js"></script>
+</body>
+
+</html>
