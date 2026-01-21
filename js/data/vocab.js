@@ -73,7 +73,7 @@ const vocabData = {
         },
         "Unit 9": {
             "Session 1": ["surprised", "frightened", "dangerous", "difficult", "easy", "hungry", "exciting", "afraid", "tired", "thirsty", "circus"],
-            "全单元单词": ["Travel", "text", "World", "tour", "email", "adventure", "busy", "round", "around", "apartment", "world"]
+            "全单元单词": ["Travel", "text", "World", "tour", "email", "adventure", "busy", "round", "around", "apartment", "world", "surprised", "frightened", "dangerous", "difficult", "easy", "hungry", "exciting", "afraid", "tired", "thirsty", "circus"]
         }
     },
     "PU3": {
