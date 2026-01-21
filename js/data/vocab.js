@@ -77,9 +77,15 @@ const vocabData = {
         }
     },
     "PU3": {
+        "Unit 1": {
+            "全单元单词": ["midday", "midnight", "o'clock", "half past", "jump", "catch", "dance", "shout", "laugh", "dress up", "hop", "skip", "climb"]
+        },
         "Unit 2": {
             "Session 1": ["tea", "cup", "coffee", "milkshake", "glass", "noodles", "yoghurt", "sauce", "cereal", "pancake", "strawberries"],
             "全单元单词": ["tea", "cup", "coffee", "milkshake", "glass", "noodles", "yoghurt", "sauce", "cereal", "pancake", "strawberries", "had", "gave", "saw", "told", "grew up", "built", "drove", "took", "wrote", "taught", "got dressed up"]
+        },
+        "Unit 3": {
+            "全单元单词": ["shoulder", "neck", "finger", "stomach", "bandage", "knee", "toe", "elbow", "back", "cough", "temperature", "sore throat", "cold", "backache", "stomach-ache", "arm", "leg", "hand", "foot", "feet", "teeth", "tooth", "ill", "sick", "problem"]
         },
         "Unit 5": {
             "Session 1": ["gold", "silver", "wing", "bright", "light", "spotted", "spots", "striped", "stripes", "plain", "trousers"],
