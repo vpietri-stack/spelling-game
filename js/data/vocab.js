@@ -87,6 +87,9 @@ const vocabData = {
         "Unit 3": {
             "全单元单词": ["shoulder", "neck", "finger", "stomach", "bandage", "knee", "toe", "elbow", "back", "cough", "temperature", "sore throat", "cold", "backache", "stomach-ache", "arm", "leg", "hand", "foot", "feet", "teeth", "tooth", "ill", "sick", "problem"]
         },
+        "Unit 4": {
+            "全单元单词": ["jungle", "moon", "star", "waterfall", "plant", "wave", "world", "sky", "island", "fast", "quick", "quickly", "angry", "angrily", "fast", "slow", "slowly", "dangerous", "dangerously", "well", "better", "the best", "more", "the most", "bad", "badly", "quiet", "quietly", "loud", "loudly", "beautiful", "beautifully", "careful", "carefully", "hard", "than"]
+        },
         "Unit 5": {
             "Session 1": ["gold", "silver", "wing", "bright", "light", "spotted", "spots", "striped", "stripes", "plain", "trousers"],
             "Session 2": ["gold", "silver", "wing", "bright", "light", "spotted", "spots", "striped", "stripes", "plain", "paper", "made of", "trousers", "shirt", "T-shirt", "jacket", "costume", "shoes", "rubber", "wearing"],
